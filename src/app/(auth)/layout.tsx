@@ -1,5 +1,4 @@
 import Image from "next/image";
-import CurrentDate from "../components/CurrentDate";
 
 export default function AuthLayout({
   children,

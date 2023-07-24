@@ -7,12 +7,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import CustomInput from "@/app/components/CustomInput";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { User } from "@/models/User";
+import { useAppDispatch } from "@/store/hooks";
+import { setLoading } from "@/store/slices/appSlice";
 
 type Props = {};
-interface User {
-  username: string;
-  password: string;
-}
 const defaultUser: User = { username: "", password: "" };
 const formValidateSchema = Yup.object().shape({
   username: Yup.string().required("Username is required").trim(),
@@ -29,13 +28,44 @@ export default function HookFormPage({}: Props) {
     resolver: yupResolver(formValidateSchema),
   });
   const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const login = async (user: User) => {
+    dispatch(setLoading(true));
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify(user),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorCode = response.status;
+        throw new Error(
+          `Request failed with status ${errorCode}: ${JSON.stringify(
+            errorData
+          )}`
+        );
+      }
+      const data = await response.json();
+      if (data && data.token) {
+        localStorage.setItem("access_token", data.token);
+        dispatch(setLoading(false));
+        router.push("/");
+        return;
+      }
+      dispatch(setLoading(false));
+      return data;
+    } catch (error: any) {
+      console.error("Error occurred:", error);
+      dispatch(setLoading(false));
+    }
+  };
 
   return (
     <div>
       <form
-        onSubmit={handleSubmit((value) => {
-          alert(JSON.stringify(value));
-          router.push("/");
+        onSubmit={handleSubmit((user) => {
+          login(user);
         })}
       >
         <Controller

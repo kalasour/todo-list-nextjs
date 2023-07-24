@@ -7,14 +7,18 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import CustomInput from "@/app/components/CustomInput";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { User } from "@/models/User";
+import { useAppDispatch } from "@/store/hooks";
+import { setLoading } from "@/store/slices/appSlice";
 
 type Props = {};
-interface User {
-  username: string;
-  password: string;
-  confirmPassword: string;
-}
-const defaultUser: User = { username: "", password: "", confirmPassword: "" };
+type UserRegister = User & { confirmPassword: string };
+
+const defaultUser: UserRegister = {
+  username: "",
+  password: "",
+  confirmPassword: "",
+};
 const formValidateSchema = Yup.object().shape({
   username: Yup.string().required("Username is required").trim(),
   password: Yup.string().required("Password is required").trim(),
@@ -28,18 +32,49 @@ export default function HookFormPage({}: Props) {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<User>({
+  } = useForm<UserRegister>({
     defaultValues: defaultUser,
     resolver: yupResolver(formValidateSchema),
   });
   const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const register = async (user: User) => {
+    dispatch(setLoading(true));
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify(user),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorCode = response.status;
+        throw new Error(
+          `Request failed with status ${errorCode}: ${JSON.stringify(
+            errorData
+          )}`
+        );
+      }
+      const data = await response.json();
+      if (data && data.token) {
+        localStorage.setItem("access_token", data.token);
+        dispatch(setLoading(false));
+        router.push("/");
+        return;
+      }
+      dispatch(setLoading(false));
+      return data;
+    } catch (error: any) {
+      dispatch(setLoading(false));
+      console.error("Error occurred:", error);
+    }
+  };
 
   return (
     <div>
       <form
-        onSubmit={handleSubmit((value) => {
-          alert(JSON.stringify(value));
-          router.push("/login");
+        onSubmit={handleSubmit((user) => {
+          register(user);
         })}
       >
         <Controller

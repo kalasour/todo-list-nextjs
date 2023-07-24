@@ -10,13 +10,14 @@ export default function TodoTask({ task }: Props) {
   let bgColor = "";
   let borderColor = "";
   let taskType = "";
-  switch (task.type) {
-    case TaskType.High:
+
+  switch (TaskType[task.type].toString()) {
+    case TaskType.High.toString():
       taskType = "HIGH PRIORITY";
       bgColor = "bg-orange-600";
       borderColor = "border-orange-800";
       break;
-    case TaskType.Normal:
+    case TaskType.Normal.toString():
       taskType = "NORMAL PRIORITY";
       bgColor = "bg-sky-600";
       borderColor = "border-sky-800";
@@ -29,7 +30,7 @@ export default function TodoTask({ task }: Props) {
   }
   return (
     <div
-      className={`${bgColor} p-3 text-white rounded-md flex items-center cursor-pointer drop-shadow-md`}
+      className={`${bgColor} p-3 text-white rounded-md flex items-center cursor-pointer drop-shadow-md hover:drop-shadow-2xl ease-in-out duration-300`}
     >
       <div className="grow">
         <p className="text-[0.65rem]">{taskType}</p>

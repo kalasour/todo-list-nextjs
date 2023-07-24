@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Header from "./components/Header";
 import { Providers } from "@/store/provider";
+import Loading from "./components/Loading";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,6 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers>
+          <Loading />
           <div className="relative flex justify-center items-center h-screen">
             <div className="bg-white w-full max-w-[450px] p-8 flex justify-center border border-slate-400">
               <div className="divide-y-2 divide-dashed flex flex-col w-full">

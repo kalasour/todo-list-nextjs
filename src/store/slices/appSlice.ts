@@ -1,52 +1,42 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../store";
-import { Task, TaskType } from "@/models/Task";
+import { Task } from "@/models/Task";
 
 type StateProp = {
-  accessToken: string;
-  tasks: Task[]
+  loggedIn: boolean;
+  tasks: Task[];
+  modalTask: boolean;
+  loading: boolean;
 };
-const initialValue: StateProp = { accessToken: "", tasks: [] };
+const initialValue: StateProp = {
+  loggedIn: false,
+  tasks: [],
+  modalTask: false,
+  loading: false,
+};
 
 const appSlice = createSlice({
   name: "app",
   initialState: initialValue,
   reducers: {
-    initTasks: (state) => {
-        state.tasks = [
-            {
-              id: 0,
-              type: TaskType.High,
-              name: "Buy Presents",
-              description: "Go and buy items from market.",
-              isDone: false,
-            },
-            {
-              id: 1,
-              type: TaskType.High,
-              name: "Go To The Store",
-              description: "Go to the store.",
-              isDone: false,
-            },
-            {
-              id: 2,
-              type: TaskType.Normal,
-              name: "Go For A Walk",
-              description: "Walk a minimum 3km today.",
-              isDone: false,
-            },
-            {
-              id: 3,
-              type: TaskType.High,
-              name: "Call James",
-              description: "Call James for a meeting update.",
-              isDone: true,
-            },
-          ].sort((a, b) => a.type - b.type);          
-      },
+    setTasks: (state, action) => {
+      state.loggedIn = true;
+      const newTasks = action.payload as Task[];
+      state.tasks = newTasks.sort((a, b) => a.type - b.type);
+    },
+    setModalTask: (state, action) => {
+      state.modalTask = action.payload;
+    },
+    setLoading: (state, action) => {
+      state.loading = action.payload;
+    },
+    logout: (state) => {
+      state.loggedIn = false;
+      localStorage.removeItem("access_token");
+    },
   },
 });
 
 export const appSelector = (state: RootState) => state.appReducer;
-export const { initTasks } = appSlice.actions;
+export const { setTasks, logout, setModalTask, setLoading } = appSlice.actions;
 export default appSlice.reducer;
