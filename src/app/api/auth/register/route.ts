@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     `,
     {
       user: {
-        username,
+        username: username.toLowerCase(),
         password: await bcrypt.hash(password, 10),
       },
     }

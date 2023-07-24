@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       }
     `,
     {
-      username,
+      username: username.toLowerCase(),
     }
   );
 
