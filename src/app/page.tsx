@@ -1,6 +1,6 @@
 "use client";
 
-import { Task } from "@/models/Task";
+import { Task, TaskType } from "@/models/Task";
 import TodoTask from "./components/TodoTask";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -12,6 +12,7 @@ import {
 import { useEffect } from "react";
 import { fetchData } from "@/utils/fetchData";
 import ModalBasic from "./components/ModalBasic";
+import TaskForm from "./components/TaskForm";
 
 async function getData() {
   const response = await fetchData({
@@ -25,18 +26,24 @@ async function getData() {
 export default function Home() {
   const tasks: Task[] = useAppSelector(appSelector).tasks;
   const modalTask = useAppSelector(appSelector).modalTask;
+  const currentTask = useAppSelector(appSelector).currentTask;
+  const fetchTasksTrigger = useAppSelector(appSelector).fetchTasksTrigger;
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    const getTask = async () => {
-      dispatch(setLoading(true));
-      const result = await getData();
-      dispatch(setTasks(result));
-      dispatch(setLoading(false));
-    };
+  const getTask = async () => {
+    dispatch(setLoading(true));
+    const result = (await getData()).map((task) => {
+      let newTask = task;
+      newTask.type = TaskType[task.type.toString() as keyof typeof TaskType];
+      return newTask;
+    });
+    dispatch(setTasks(result));
+    dispatch(setLoading(false));
+  };
 
+  useEffect(() => {
     getTask();
-  }, []);
+  }, [fetchTasksTrigger]);
 
   const unCompleteTodoTask = tasks
     .filter((task) => !task.isDone)
@@ -50,10 +57,10 @@ export default function Home() {
     <main className="flex min-h-[70dvh] flex-col items-center">
       <ModalBasic
         modalOpen={modalTask}
-        title="Create Task"
+        title={currentTask.id == -1 ? "Create Task" : "Update Task"}
         modalClose={() => dispatch(setModalTask(false))}
       >
-        Testttttt
+        <TaskForm></TaskForm>
       </ModalBasic>
       <div className="divide-y-2 divide-dashed flex flex-col w-full gap-8">
         <div>

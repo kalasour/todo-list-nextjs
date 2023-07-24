@@ -1,6 +1,8 @@
 import { GraphQLClient } from "graphql-request";
+import { NextRequest } from "next/server";
 
-export const graphQLClient = (token?: string) => {
+export const graphQLClient = (req?: NextRequest) => {
+  const token = req?.headers.get("authorization");
   return new GraphQLClient(
     process.env.HASURA_URL || "http://localhost:8080/v1/graphql",
     {
